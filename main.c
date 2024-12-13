@@ -11,9 +11,7 @@ int FindFirstEmpty(int* inverted_table, int num_pages){
             return i;
         }
     }
-
-    //chama algoritmo
-
+    return -1;
 }
 
 int main (int argc, char* argv[]){
@@ -57,6 +55,15 @@ int main (int argc, char* argv[]){
 
         struct mem_address pagina;
         pagina.addr = page;
+
+        int aux = FindFirstEmpty(inverted_table, num_pages);
+
+        if(aux != -1){
+            inverted_table[aux] = pagina; //apenas uma ideia, a tabela ia ter que ser de struct pra fazer essa atribuiçao
+        }
+        else{
+            //chama algoritmo
+        } 
 
     }
 
