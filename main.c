@@ -327,30 +327,30 @@ int main (int argc, char* argv[]){
         page.addr = p;
         page.rw = rw;
 
+        if (mode[0] == 'l') {
+            inverted_lru(table, num_pages, page);
+        } else if (mode[0] == 'f') {
+            inverted_fifo(table, num_pages, page);
+        } else if (mode[0] == 'r') {
+            inverted_random(table, num_pages, page);
+        } else{
+            inverted_2a(table, num_pages, page, second_chance);
+        }
+
         // if (mode[0] == 'l') {
-        //     inverted_lru(table, num_pages, page);
+        //     dense_lru(table, num_pages, dense_size, page);
         // } else if (mode[0] == 'f') {
-        //     inverted_fifo(table, num_pages, page);
+        //     dense_fifo(table, num_pages, dense_size, page);
         // } else if (mode[0] == 'r') {
-        //     inverted_random(table, num_pages, page);
+        //     dense_random(table, num_pages, dense_size, page);
         // } else{
-        //     inverted_2a(table, num_pages, page, second_chance);
+        //     // dense_2a(table, num_pages, dense_size, page, second_chance);
         // }
 
-        if (mode[0] == 'l') {
-            dense_lru(table, num_pages, dense_size, page);
-        } else if (mode[0] == 'f') {
-            dense_fifo(table, num_pages, dense_size, page);
-        } else if (mode[0] == 'r') {
-            dense_random(table, num_pages, dense_size, page);
-        } else{
-            // dense_2a(table, num_pages, dense_size, page, second_chance);
-        }
-
-        for (int i = 0; i < dense_size; i++){
-            if (table[i].addr == 1) printf("%d ", i);
-        }
-        printf("\n");
+        // for (int i = 0; i < dense_size; i++){
+        //     if (table[i].addr == 1) printf("%d ", i);
+        // }
+        // printf("\n");
 
     }
 
