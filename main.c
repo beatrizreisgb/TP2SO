@@ -129,7 +129,6 @@ void _2a(struct mem_address* inverted_table, int num_pages, struct mem_address p
         int idx = (second_chance_idx + i) % num_pages;
         if (second_chance[idx] == 1) {
             second_chance[idx] = 0;
-            second_chance_idx = (second_chance_idx + 1) % num_pages; // última alteração
             continue;
         }
         else{
@@ -139,7 +138,7 @@ void _2a(struct mem_address* inverted_table, int num_pages, struct mem_address p
     }
 
     if (choice == -1) choice = second_chance_idx;
-    second_chance_idx = (second_chance_idx + 1) % num_pages;
+    second_chance_idx = (choice + 1) % num_pages;
 
     if (inverted_table[choice].rw == 'W'){
         written++;
