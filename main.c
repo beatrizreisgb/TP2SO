@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <time.h>
 
+#define INF 1000000000
+
 int fifo_first = 0;
 int hit = 0;
 int miss = 0;
-int lru_time = 0;
+int global_time = 0;
 int written = 0;
 int second_chance_idx = 0;
+int pages_count = 0;
 
 struct mem_address{
     unsigned addr;
@@ -15,7 +18,7 @@ struct mem_address{
     char rw;
 };
 
-void _fifo(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
+void inverted_fifo(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
     int page = pg.addr;
     char rw = pg.rw;
 
@@ -41,26 +44,29 @@ void _fifo(struct mem_address* inverted_table, int num_pages, struct mem_address
     return;
 }
 
-void _lru(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
+void inverted_lru(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
     int page = pg.addr;
     char rw = pg.rw;
 
     for (int i = 0; i < num_pages; i++) {
         if (inverted_table[i].addr == page) {
             hit++;
-            inverted_table[i].time = lru_time;
-            lru_time++;
+            printf("hit\n");
+            inverted_table[i].time = global_time;
+            global_time++;
             return;
         }
         if(inverted_table[i].addr == -1){
             inverted_table[i].addr = page;
-            inverted_table[i].time = lru_time;
+            inverted_table[i].time = global_time;
             miss++;
-            lru_time++;
+            printf("miss tinha espaço\n");
+            global_time++;
             return;
         }
     }
     miss++;
+    printf("miss\n");
     int lru = 0; // least recently used position
 
     for (int i = 0; i < num_pages; i++) {
@@ -74,14 +80,14 @@ void _lru(struct mem_address* inverted_table, int num_pages, struct mem_address 
     }
 
     inverted_table[lru].addr = page;
-    inverted_table[lru].time = lru_time;
+    inverted_table[lru].time = global_time;
 
-    lru_time++;
+    global_time++;
 
     return;
 }
 
-void _random(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
+void inverted_random(struct mem_address* inverted_table, int num_pages, struct mem_address pg){
     int page = pg.addr;
     char rw = pg.rw;
 
@@ -98,7 +104,6 @@ void _random(struct mem_address* inverted_table, int num_pages, struct mem_addre
     }
     miss++;
     int rand_idx = rand() % num_pages;
-    printf("rand_idx: %d\n", rand_idx);
     if (inverted_table[rand_idx].rw == 'W'){
         written++;
     }
@@ -106,7 +111,7 @@ void _random(struct mem_address* inverted_table, int num_pages, struct mem_addre
     return;
 }
 
-void _2a(struct mem_address* inverted_table, int num_pages, struct mem_address pg, int* second_chance){
+void inverted_2a(struct mem_address* inverted_table, int num_pages, struct mem_address pg, int* second_chance){
     int page = pg.addr;
     char rw = pg.rw;
 
@@ -149,6 +154,86 @@ void _2a(struct mem_address* inverted_table, int num_pages, struct mem_address p
     return;
 }
 
+void dense_fifo(struct mem_address* dense_table, int num_pages, int dense_size, struct mem_address pg){
+    int page = pg.addr;
+    char rw = pg.rw;
+    int min_time = INF;
+    int fifo_first = 0;
+
+    if (dense_table[page].addr == 1) {
+        hit++;
+        global_time++;
+        return;
+    }
+    
+    miss++;
+
+    if (pages_count < num_pages){
+        dense_table[page].addr = 1;
+        dense_table[page].time = global_time++;
+        pages_count++;
+        return;
+    }
+
+    for (int i = 0; i < dense_size; i++) {
+        if (dense_table[i].time < min_time) {
+            min_time = dense_table[i].time;
+            fifo_first = i;
+        }
+    }
+
+    if (dense_table[fifo_first].rw == 'W'){
+        written++;
+    }
+
+    dense_table[fifo_first].addr = -1;
+    dense_table[fifo_first].time = INF;
+    dense_table[page].addr = 1;
+    dense_table[page].time = global_time++;
+
+    return;
+}
+
+void dense_lru(struct mem_address* dense_table, int num_pages, int dense_size, struct mem_address pg){
+    int page = pg.addr;
+    char rw = pg.rw;
+    int min_time = INF;
+    int lru = 0;
+
+    if (dense_table[page].addr == 1) {
+        dense_table[page].time = global_time++;
+        hit++;
+        return;
+    }
+    
+    miss++;
+
+    if (pages_count < num_pages){
+        dense_table[page].addr = 1;
+        dense_table[page].time = global_time++;
+        pages_count++;
+        return;
+    }
+
+    for (int i = 0; i < dense_size; i++) {
+        if (dense_table[i].time < min_time) {
+            min_time = dense_table[i].time;
+            lru = i;
+        }
+    }
+
+    if (dense_table[lru].rw == 'W'){
+        written++;
+    }
+
+    dense_table[lru].addr = -1;
+    dense_table[lru].time = INF;
+    dense_table[page].addr = 1;
+    dense_table[page].time = global_time++;
+
+    return;
+}
+
 
 
 int main (int argc, char* argv[]){
@@ -164,7 +249,8 @@ int main (int argc, char* argv[]){
     char* file_name = argv[2];
     int page_size = atoi(argv[3]);
     int mem_size = atoi(argv[4]);
-    char* debug_flag = argv[5];
+    char* table_type = argv[5];
+    char* debug_flag = argv[6];
 
     int num_pages = mem_size / page_size;
 
@@ -174,13 +260,24 @@ int main (int argc, char* argv[]){
         return 1;
     }
 
-    struct mem_address inverted_table[num_pages];
-    int second_chance[num_pages];
+    struct mem_address* table;
+    int* second_chance;
+    int dense_size = mem_size*1024;
 
-    for (int i = 0; i < num_pages; i++){
-        inverted_table[i].addr = -1;
-        inverted_table[i].time = 0;
-        second_chance[i] = 0;
+    if (table_type[0] == 'i'){
+        table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
+        second_chance = (int*) malloc(num_pages * sizeof(int));
+        for (int i = 0; i < num_pages; i++){
+            table[i].addr = -1;
+            table[i].time = 0;
+        }
+
+    } else if (table_type[0] == 'd'){
+        table = (struct mem_address*) malloc(dense_size * sizeof(struct mem_address)); 
+        for (int i = 0; i < dense_size; i++){
+            table[i].addr = -1;
+            table[i].time = INF;
+        }
     }
 
     // leitura do endereço e operação
@@ -201,29 +298,29 @@ int main (int argc, char* argv[]){
         page.rw = rw;
 
         if (mode[0] == 'l') {
-            _lru(inverted_table, num_pages, page);
+            inverted_lru(table, num_pages, page);
         } else if (mode[0] == 'f') {
-            _fifo(inverted_table, num_pages, page);
+            inverted_fifo(table, num_pages, page);
         } else if (mode[0] == 'r') {
-            _random(inverted_table, num_pages, page);
+            inverted_random(table, num_pages, page);
         } else{
-            _2a(inverted_table, num_pages, page, second_chance);
+            inverted_2a(table, num_pages, page, second_chance);
         }
 
-        // print vector inverted_table
-        if (1){
-            printf("Inverted table: ");
-            for (int i = 0; i < num_pages; i++){
-                printf("%d ", inverted_table[i].addr);
-            }
-            printf("\n");
+        // if (mode[0] == 'l') {
+        //     dense_lru(table, num_pages, dense_size, page);
+        // } else if (mode[0] == 'f') {
+        //     dense_fifo(table, num_pages, dense_size, page);
+        // } else if (mode[0] == 'r') {
+        //     // dense_random(table, num_pages, dense_size, page);
+        // } else{
+        //     // dense_2a(table, num_pages, dense_size, page, second_chance);
+        // }
 
-            printf("Second chance: ");
-            for (int i = 0; i < num_pages; i++){
-                printf("%d ", second_chance[i]);
-            }
-            printf("\n");
+        for (int i = 0; i < dense_size; i++){
+            if (table[i].addr == 1) printf("%d ", i);
         }
+        printf("\n");
 
     }
 
