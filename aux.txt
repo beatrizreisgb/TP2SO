@@ -1,30 +1,25 @@
-
-
-
-hit
+0 
+0 4 
+0 1 4 
+0 1 4 
+rand idx 0 
 1 2 4 
-
-miss
-1 2 3 4 
-hit
-1 2 3 4 
-hit
-1 2 3 4 
-hit
-1 2 3 4 
-miss
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
-hit
-0 1 2 3 4 
+1 2 4 
+rand idx 1 
+2 3 4 
+2 3 4 
+2 3 4 
+2 3 4 
+rand idx 3 
+0 2 4 
+0 2 4 
+rand idx 2 
+0 1 4 
+0 1 4 
+rand idx 0 
+1 2 4 
+1 2 4 
+rand idx 4 
+1 2 3 
+rand idx 2 
+1 3 4 

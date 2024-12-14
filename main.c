@@ -60,13 +60,13 @@ void inverted_lru(struct mem_address* inverted_table, int num_pages, struct mem_
             inverted_table[i].addr = page;
             inverted_table[i].time = global_time;
             miss++;
-            printf("miss tinha espaço\n");
+            //printf("miss tinha espaço\n");
             global_time++;
             return;
         }
     }
     miss++;
-    printf("miss\n");
+    //printf("miss\n");
     int lru = 0; // least recently used position
 
     for (int i = 0; i < num_pages; i++) {
@@ -225,7 +225,6 @@ void dense_lru(struct mem_address* dense_table, int num_pages, int dense_size, s
     if (dense_table[lru].rw == 'W'){
         written++;
     }
-
     dense_table[lru].addr = -1;
     dense_table[lru].time = INF;
     dense_table[page].addr = 1;
@@ -234,7 +233,38 @@ void dense_lru(struct mem_address* dense_table, int num_pages, int dense_size, s
     return;
 }
 
+void dense_random(struct mem_address* dense_table, int num_pages, int dense_size, struct mem_address pg){
+    int page = pg.addr;
+    char rw = pg.rw;
+    int rand_idx;
 
+    if (dense_table[page].addr == 1) {
+        hit++;
+        return;
+    }
+    
+    miss++;
+
+    if (pages_count < num_pages){
+        dense_table[page].addr = 1;
+        pages_count++;
+        return;
+    }
+
+    do{
+        rand_idx = rand() % dense_size;
+    }while(dense_table[rand_idx].addr != 1);
+    
+    if (dense_table[rand_idx].rw == 'W'){
+        written++;
+    }
+    printf("rand idx %d \n", rand_idx);
+
+    dense_table[rand_idx].addr = -1;
+    dense_table[page].addr = 1;
+
+    return;
+}
 
 int main (int argc, char* argv[]){
     
@@ -297,25 +327,25 @@ int main (int argc, char* argv[]){
         page.addr = p;
         page.rw = rw;
 
-        if (mode[0] == 'l') {
-            inverted_lru(table, num_pages, page);
-        } else if (mode[0] == 'f') {
-            inverted_fifo(table, num_pages, page);
-        } else if (mode[0] == 'r') {
-            inverted_random(table, num_pages, page);
-        } else{
-            inverted_2a(table, num_pages, page, second_chance);
-        }
-
         // if (mode[0] == 'l') {
-        //     dense_lru(table, num_pages, dense_size, page);
+        //     inverted_lru(table, num_pages, page);
         // } else if (mode[0] == 'f') {
-        //     dense_fifo(table, num_pages, dense_size, page);
+        //     inverted_fifo(table, num_pages, page);
         // } else if (mode[0] == 'r') {
-        //     // dense_random(table, num_pages, dense_size, page);
+        //     inverted_random(table, num_pages, page);
         // } else{
-        //     // dense_2a(table, num_pages, dense_size, page, second_chance);
+        //     inverted_2a(table, num_pages, page, second_chance);
         // }
+
+        if (mode[0] == 'l') {
+            dense_lru(table, num_pages, dense_size, page);
+        } else if (mode[0] == 'f') {
+            dense_fifo(table, num_pages, dense_size, page);
+        } else if (mode[0] == 'r') {
+            dense_random(table, num_pages, dense_size, page);
+        } else{
+            // dense_2a(table, num_pages, dense_size, page, second_chance);
+        }
 
         for (int i = 0; i < dense_size; i++){
             if (table[i].addr == 1) printf("%d ", i);
