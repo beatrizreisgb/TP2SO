@@ -29,6 +29,7 @@ void inverted_fifo(struct mem_address* inverted_table, int num_pages, struct mem
         }
         if(inverted_table[i].addr == -1){
             inverted_table[i].addr = page;
+            inverted_table[i].rw = rw;
             miss++;
             return;
         }
@@ -40,6 +41,7 @@ void inverted_fifo(struct mem_address* inverted_table, int num_pages, struct mem
     }
 
     inverted_table[fifo_first].addr = page;
+    inverted_table[fifo_first].rw = rw;
     fifo_first = (fifo_first + 1) % num_pages;
     return;
 }
@@ -51,7 +53,6 @@ void inverted_lru(struct mem_address* inverted_table, int num_pages, struct mem_
     for (int i = 0; i < num_pages; i++) {
         if (inverted_table[i].addr == page) {
             hit++;
-            printf("hit\n");
             inverted_table[i].time = global_time;
             global_time++;
             return;
@@ -59,14 +60,13 @@ void inverted_lru(struct mem_address* inverted_table, int num_pages, struct mem_
         if(inverted_table[i].addr == -1){
             inverted_table[i].addr = page;
             inverted_table[i].time = global_time;
+            inverted_table[i].rw = rw;
             miss++;
-            //printf("miss tinha espaço\n");
             global_time++;
             return;
         }
     }
     miss++;
-    //printf("miss\n");
     int lru = 0; // least recently used position
 
     for (int i = 0; i < num_pages; i++) {
@@ -80,6 +80,7 @@ void inverted_lru(struct mem_address* inverted_table, int num_pages, struct mem_
     }
 
     inverted_table[lru].addr = page;
+    inverted_table[lru].rw = rw;
     inverted_table[lru].time = global_time;
 
     global_time++;
@@ -98,6 +99,7 @@ void inverted_random(struct mem_address* inverted_table, int num_pages, struct m
         }
         if(inverted_table[i].addr == -1){
             inverted_table[i].addr = page;
+            inverted_table[i].rw = rw;
             miss++;
             return;
         }
@@ -108,6 +110,7 @@ void inverted_random(struct mem_address* inverted_table, int num_pages, struct m
         written++;
     }
     inverted_table[rand_idx].addr = page;
+    inverted_table[rand_idx].rw = rw;
     return;
 }
 
@@ -123,6 +126,7 @@ void inverted_2a(struct mem_address* inverted_table, int num_pages, struct mem_a
         }
         if(inverted_table[i].addr == -1){
             inverted_table[i].addr = page;
+            inverted_table[i].rw = rw;
             miss++;
             return;
         }
@@ -150,6 +154,7 @@ void inverted_2a(struct mem_address* inverted_table, int num_pages, struct mem_a
     }
 
     inverted_table[choice].addr = page;
+    inverted_table[choice].rw = rw;
     second_chance[choice] = 0;
     return;
 }
@@ -170,6 +175,7 @@ void dense_fifo(struct mem_address* dense_table, int num_pages, int dense_size, 
 
     if (pages_count < num_pages){
         dense_table[page].addr = 1;
+        dense_table[page].rw = rw;
         dense_table[page].time = global_time++;
         pages_count++;
         return;
@@ -188,8 +194,10 @@ void dense_fifo(struct mem_address* dense_table, int num_pages, int dense_size, 
 
     dense_table[fifo_first].addr = -1;
     dense_table[fifo_first].time = INF;
+    dense_table[fifo_first].rw = ' ';
     dense_table[page].addr = 1;
     dense_table[page].time = global_time++;
+    dense_table[page].rw = rw;
 
     return;
 }
@@ -210,6 +218,7 @@ void dense_lru(struct mem_address* dense_table, int num_pages, int dense_size, s
 
     if (pages_count < num_pages){
         dense_table[page].addr = 1;
+        dense_table[page].rw = rw;
         dense_table[page].time = global_time++;
         pages_count++;
         return;
@@ -227,8 +236,10 @@ void dense_lru(struct mem_address* dense_table, int num_pages, int dense_size, s
     }
     dense_table[lru].addr = -1;
     dense_table[lru].time = INF;
+    dense_table[lru].rw = ' ';
     dense_table[page].addr = 1;
     dense_table[page].time = global_time++;
+    dense_table[page].rw = rw;
 
     return;
 }
@@ -247,6 +258,7 @@ void dense_random(struct mem_address* dense_table, int num_pages, int dense_size
 
     if (pages_count < num_pages){
         dense_table[page].addr = 1;
+        dense_table[page].rw = rw;
         pages_count++;
         return;
     }
@@ -261,7 +273,9 @@ void dense_random(struct mem_address* dense_table, int num_pages, int dense_size
     printf("rand idx %d \n", rand_idx);
 
     dense_table[rand_idx].addr = -1;
+    dense_table[rand_idx].rw = ' ';
     dense_table[page].addr = 1;
+    dense_table[page].rw = rw;
 
     return;
 }
@@ -277,8 +291,8 @@ int main (int argc, char* argv[]){
 
     char* mode = argv[1];
     char* file_name = argv[2];
-    int page_size = atoi(argv[3]);
-    int mem_size = atoi(argv[4]);
+    int page_size = atoi(argv[3])*1024;
+    int mem_size = atoi(argv[4])*1024;
     char* table_type = argv[5];
     char* debug_flag = argv[6];
 
@@ -351,7 +365,6 @@ int main (int argc, char* argv[]){
         //     if (table[i].addr == 1) printf("%d ", i);
         // }
         // printf("\n");
-
     }
 
     printf("Hits: %d\n", hit);
