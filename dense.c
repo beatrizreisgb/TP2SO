@@ -12,7 +12,9 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].time = INF;
     }
     printf("oi bia\n");
+    printf("dense_size %d\n", dense_size);
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
+        printf("mengo\n");
         struct mem_address pg;
         pg.addr = get_address(page_size);
         pg.rw = rw;
@@ -22,15 +24,13 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         int fifo_first = 0;
         int found = 0;
 
-        printf("mengo\n");
-
         if (table[page].addr == 1) {
             hit++;
             global_time++;
-            continue;
             found++;
-            
         }
+
+        if (found) continue;
         
         miss++;
 
@@ -39,12 +39,13 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
             table[page].rw = rw;
             table[page].time = global_time++;
             pages_count++;
-            continue;
             found++;
         }
+
         if(found) continue;
 
         for (int i = 0; i < dense_size; i++) {
+            printf("i: %d\n", i);
             if (table[i].time < min_time) {
                 min_time = table[i].time;
                 fifo_first = i;
