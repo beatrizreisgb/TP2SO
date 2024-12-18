@@ -14,7 +14,6 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
     printf("oi bia\n");
     printf("dense_size %d\n", dense_size);
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
-        printf("mengo\n");
         struct mem_address pg;
         pg.addr = get_address(page_size);
         pg.rw = rw;
