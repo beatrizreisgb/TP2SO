@@ -11,11 +11,10 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].addr = -1;
         table[i].time = INF;
     }
-    printf("oi bia\n");
-    printf("dense_size %d\n", dense_size);
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -43,13 +42,14 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
 
         if(found) continue;
 
-        for (int i = 0; i < dense_size; i++) {
-            printf("i: %d\n", i);
-            if (table[i].time < min_time) {
-                min_time = table[i].time;
-                fifo_first = i;
-            }
-        }
+
+        //problema de desempenho
+        // for (int i = 0; i < dense_size; i++) {
+        //     if (table[i].time < min_time) {
+        //         min_time = table[i].time;
+        //         fifo_first = i;
+        //     }
+        // }
 
         if (table[fifo_first].rw == 'W'){
             written++;
@@ -77,7 +77,8 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size){
     }
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -100,12 +101,12 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size){
             continue;
         }
 
-        for (int i = 0; i < dense_size; i++) {
-            if (table[i].time < min_time) {
-                min_time = table[i].time;
-                lru = i;
-            }
-        }
+        //for (int i = 0; i < dense_size; i++) {
+        //   if (table[i].time < min_time) {
+        //        min_time = table[i].time;
+        //        lru = i;
+        //   }
+        //}
 
         if (table[lru].rw == 'W'){
             written++;
@@ -132,7 +133,8 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size){
     }
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -152,14 +154,14 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size){
             continue;
         }
 
-        do{
+        //do{
             rand_idx = rand() % dense_size;
-        }while(table[rand_idx].addr != 1);
+        //}while(table[rand_idx].addr != 1);
         
         if (table[rand_idx].rw == 'W'){
             written++;
         }
-        printf("rand idx %d \n", rand_idx);
+
 
         table[rand_idx].addr = -1;
         table[rand_idx].rw = ' ';

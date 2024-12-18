@@ -9,14 +9,6 @@
 FILE *file;
 int page_size;
 
-int power(int base, int exp) {
-    int resultado = 1;
-    for (int i = 0; i < exp; i++) {
-        resultado *= base;
-    }
-    return resultado;
-}
-
 int main (int argc, char* argv[]){
     
     srand(time(NULL));
@@ -30,7 +22,7 @@ int main (int argc, char* argv[]){
 
     int num_pages = mem_size / page_size;
     
-    int dense_size = power(2, (32-get_address(page_size)));  
+    int dense_size = power(2, (32-find_s(page_size)));
 
     file = fopen(file_name, "r");
     if (file == NULL) {

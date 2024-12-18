@@ -17,6 +17,8 @@ struct mem_address{
     char rw;
 };
 
-int get_address(int page_size);
+int power(int base, int exp);
+
+unsigned find_s(int page_size);
 
 void print_result();

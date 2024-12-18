@@ -36,25 +36,14 @@ unsigned find_s(int page_size){
         tmp = tmp>>1;
         s++;
     }
-}
-
-int find_expoent(int page_size) {
-    int expoent = 0;
-    // page_size *= 1024;
-    while (!(page_size % 2)) {
-        page_size /= 2;
-        expoent++;
-    }
-    return expoent;
+    return s;
 }
 
 void dense_fifo(struct mem_address* dense_table, int num_pages, int dense_size, struct mem_address pg){
-    int page = pg.addr;
+    int page = pg.addr; 
     char rw = pg.rw;
     int min_time = INF;
     int fifo_first = 0;
-
-    printf("%d\n", page);
 
     if (dense_table[page].addr == 1) {
         hit++;
@@ -72,12 +61,12 @@ void dense_fifo(struct mem_address* dense_table, int num_pages, int dense_size, 
         return;
     }
 
-    for (int i = 0; i < dense_size; i++) {
-        if (dense_table[i].time < min_time) {
-            min_time = dense_table[i].time;
-            fifo_first = i;
-        }
-    }
+    // for (int i = 0; i < dense_size; i++) {
+    //     if (dense_table[i].time < min_time) {
+    //         min_time = dense_table[i].time;
+    //         fifo_first = i;
+    //     }
+    // }
 
     if (dense_table[fifo_first].rw == 'W'){
         written++;
@@ -153,11 +142,10 @@ void dense_random(struct mem_address* dense_table, int num_pages, int dense_size
         pages_count++;
         return;
     }
-
-    do{
-        rand_idx = rand() % dense_size;
-    }while(dense_table[rand_idx].addr != 1);
     
+    rand_idx = rand() % dense_size;
+    
+
     if (dense_table[rand_idx].rw == 'W'){
         written++;
     }
@@ -196,11 +184,10 @@ int main (int argc, char* argv[]){
     struct mem_address* table;
     int* second_chance;
     int dense_size1 = mem_size;
-    int dense_size = power(2, (32-find_expoent(page_size)));
+    int dense_size = power(2, (32-find_s(page_size)));
 
-    printf("diogo: %d\n", find_expoent(page_size));
-    printf("s: %d\n", find_s(page_size));
-    printf("dense_size: %d\n", dense_size);
+    // printf("s: %d\n", find_s(page_size));
+    // printf("dense_size: %d\n", dense_size);
     // printf("dense2: %d\n", dense_size2);
 
     if (table_type[0] == 'd'){
@@ -213,7 +200,7 @@ int main (int argc, char* argv[]){
 
     // leitura do endereço e operação
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
-        unsigned s = find_expoent(page_size);
+        unsigned s = find_s(page_size);
         unsigned p = addr >> s; //end da pagina
 
         struct mem_address page;

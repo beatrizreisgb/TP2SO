@@ -10,7 +10,15 @@ int pages_count = 0;
 unsigned addr;
 char rw;
 
-int get_address(int page_size){
+int power(int base, int exp) {
+    int resultado = 1;
+    for (int i = 0; i < exp; i++) {
+        resultado *= base;
+    }
+    return resultado;
+}
+
+unsigned find_s(int page_size){
     unsigned s, tmp;
     // Derivar o valor de s: 
     tmp = page_size;
@@ -19,9 +27,7 @@ int get_address(int page_size){
         tmp = tmp>>1;
         s++;
     }
-
-    int p = addr >> s; //end da pagina
-    return p;
+    return s;
 }
 
 void print_result(){

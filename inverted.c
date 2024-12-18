@@ -6,7 +6,8 @@ void inverted_fifo(int num_pages, int page_size, FILE* file){
     table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -46,7 +47,8 @@ void inverted_lru(int num_pages, int page_size, FILE* file){
     table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -100,7 +102,8 @@ void inverted_random(int num_pages, int page_size, FILE* file){
     table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
@@ -144,7 +147,8 @@ void inverted_2a(int num_pages, int page_size, FILE* file){
     }
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
-        pg.addr = get_address(page_size);
+        int s = find_s(page_size);
+        pg.addr = addr >> s;
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
