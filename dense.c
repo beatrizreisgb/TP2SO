@@ -20,6 +20,7 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         char rw = pg.rw;
         int min_time = INF;
         int fifo_first = 0;
+        int found = 0;
 
         printf("mengo\n");
 
@@ -27,6 +28,8 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
             hit++;
             global_time++;
             continue;
+            found++;
+            
         }
         
         miss++;
@@ -37,7 +40,9 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
             table[page].time = global_time++;
             pages_count++;
             continue;
+            found++;
         }
+        if(found) continue;
 
         for (int i = 0; i < dense_size; i++) {
             if (table[i].time < min_time) {
