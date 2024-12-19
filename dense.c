@@ -11,6 +11,10 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].addr = -1;
         table[i].time = INF;
     }
+
+    int* time_table;
+    time_table = (int*) malloc(num_pages * sizeof(int));
+
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -18,9 +22,10 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
+        int found = 0;
         int min_time = INF;
         int fifo_first = 0;
-        int found = 0;
+
 
         if (table[page].addr == 1) {
             hit++;
@@ -35,7 +40,7 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
-            table[page].time = global_time++;
+            time_table[pages_count] = global_time++;
             pages_count++;
             found++;
         }
@@ -43,27 +48,28 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         if(found) continue;
 
 
-        //problema de desempenho
-        // for (int i = 0; i < dense_size; i++) {
-        //     if (table[i].time < min_time) {
-        //         min_time = table[i].time;
-        //         fifo_first = i;
-        //     }
-        // }
+        // problema de desempenho
+        for (int i = 0; i < num_pages; i++) {
+            if (time_table[i] < min_time) {
+                min_time = time_table[i];
+                fifo_first = i;
+            }
+        }
 
         if (table[fifo_first].rw == 'W'){
             written++;
         }
 
         table[fifo_first].addr = -1;
-        table[fifo_first].time = INF;
         table[fifo_first].rw = ' ';
         table[page].addr = 1;
-        table[page].time = global_time++;
         table[page].rw = rw;
+
+        time_table[fifo_first] = global_time++;
 
         continue;
     }
+    
     print_result();
 }
 
