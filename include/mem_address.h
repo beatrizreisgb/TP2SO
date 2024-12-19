@@ -17,6 +17,11 @@ struct mem_address{
     char rw;
 };
 
+struct page_time{
+    unsigned page;
+    unsigned time;
+};
+
 int power(int base, int exp);
 
 unsigned find_s(int page_size);

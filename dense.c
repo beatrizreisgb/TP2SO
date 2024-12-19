@@ -12,8 +12,8 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].time = INF;
     }
 
-    int* time_table;
-    time_table = (int*) malloc(num_pages * sizeof(int));
+    struct page_time* time_table;
+    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
 
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -25,6 +25,7 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         int found = 0;
         int min_time = INF;
         int fifo_first = 0;
+        int time_idx = 0;
 
 
         if (table[page].addr == 1) {
@@ -40,7 +41,8 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
-            time_table[pages_count] = global_time++;
+            time_table[pages_count].time = global_time++;
+            time_table[pages_count].page = page;
             pages_count++;
             found++;
         }
@@ -48,11 +50,11 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
         if(found) continue;
 
 
-        // problema de desempenho
         for (int i = 0; i < num_pages; i++) {
-            if (time_table[i] < min_time) {
-                min_time = time_table[i];
-                fifo_first = i;
+            if (time_table[i].time < min_time) {
+                min_time = time_table[i].time;
+                fifo_first = time_table[i].page;
+                time_idx = i;
             }
         }
 
@@ -62,10 +64,12 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size){
 
         table[fifo_first].addr = -1;
         table[fifo_first].rw = ' ';
+
         table[page].addr = 1;
         table[page].rw = rw;
 
-        time_table[fifo_first] = global_time++;
+        time_table[time_idx].time = global_time++;
+        time_table[time_idx].page = page;
 
         continue;
     }
@@ -81,6 +85,10 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].addr = -1;
         table[i].time = INF;
     }
+
+    struct page_time* time_table;
+    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+   
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -88,44 +96,63 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size){
         pg.rw = rw;
         int page = pg.addr;
         char rw = pg.rw;
+        int found = 0;
         int min_time = INF;
-        int lru = 0;
+        int fifo_first = 0;
+        int time_idx = 0;
+
 
         if (table[page].addr == 1) {
-            table[page].time = global_time++;
             hit++;
-            continue;
+            for (int i = 0; i < num_pages; i++) {
+                if (time_table[i].page == page){
+                    time_table[i].time = global_time++;
+                    break;
+                }
+            }
+            found++;
         }
+
+        if (found) continue;
         
         miss++;
 
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
-            table[page].time = global_time++;
+            time_table[pages_count].time = global_time++;
+            time_table[pages_count].page = page;
             pages_count++;
-            continue;
+            found++;
         }
 
-        //for (int i = 0; i < dense_size; i++) {
-        //   if (table[i].time < min_time) {
-        //        min_time = table[i].time;
-        //        lru = i;
-        //   }
-        //}
+        if(found) continue;
 
-        if (table[lru].rw == 'W'){
+
+        for (int i = 0; i < num_pages; i++) {
+            if (time_table[i].time < min_time) {
+                min_time = time_table[i].time;
+                fifo_first = time_table[i].page;
+                time_idx = i;
+            }
+        }
+
+        if (table[fifo_first].rw == 'W'){
             written++;
         }
-        table[lru].addr = -1;
-        table[lru].time = INF;
-        table[lru].rw = ' ';
+
+        table[fifo_first].addr = -1;
+        table[fifo_first].rw = ' ';
+
         table[page].addr = 1;
-        table[page].time = global_time++;
         table[page].rw = rw;
+
+        time_table[time_idx].time = global_time++;
+        time_table[time_idx].page = page;
 
         continue;
     }
+    
     print_result();
 }
 
@@ -137,6 +164,10 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size){
         table[i].addr = -1;
         table[i].time = INF;
     }
+    
+    struct page_time* time_table;
+    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -156,23 +187,29 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size){
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
+            time_table[pages_count].time = global_time++;
+            time_table[pages_count].page = page;
             pages_count++;
             continue;
         }
 
-        //do{
-            rand_idx = rand() % dense_size;
-        //}while(table[rand_idx].addr != 1);
+    
+        rand_idx = rand() % num_pages;
+
+        int choice = time_table[rand_idx].page;
         
-        if (table[rand_idx].rw == 'W'){
+        if (table[choice].rw == 'W'){
             written++;
         }
 
+        table[choice].addr = -1;
+        table[choice].rw = ' ';
 
-        table[rand_idx].addr = -1;
-        table[rand_idx].rw = ' ';
         table[page].addr = 1;
         table[page].rw = rw;
+
+        time_table[rand_idx].time = global_time++;
+        time_table[rand_idx].page = page;
 
         continue;
     }
