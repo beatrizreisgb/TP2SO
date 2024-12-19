@@ -35,3 +35,12 @@ void print_result(){
     printf("Misses/Page faults: %d\n", miss);
     printf("Writes: %d\n", written);
 }
+
+unsigned find_row(unsigned page, int shift){
+    return page >> shift;
+}
+
+unsigned find_column(unsigned num, int shift) {
+    unsigned mask = (1U << shift) - 1; 
+    return num & mask;  
+}

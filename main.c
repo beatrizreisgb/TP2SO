@@ -4,6 +4,8 @@
 #include "include/mem_address.h"
 #include "include/inverted.h"
 #include "include/dense.h"
+#include "include/hier2.h"
+#include "include/hier3.h"
 
 
 FILE *file;
@@ -60,8 +62,41 @@ int main (int argc, char* argv[]){
             dense_random(num_pages, page_size, file, dense_size);
             break;
         case '2':
-        
-            //dense_2a(num_pages, page_size, file, dense_size);
+            dense_2a(num_pages, page_size, file, dense_size);
+            break;
+        }
+        break;
+
+    case '2':
+        switch (mode[0]){
+        case 'l':
+            hier2_lru(num_pages, page_size, file);
+            break;
+        case 'f':   
+            hier2_fifo(num_pages, page_size, file);
+            break;
+        case 'r':
+            hier2_random(num_pages, page_size, file);
+            break;
+        case '2':
+            hier2_2a(num_pages, page_size, file);
+            break;
+        }
+        break;
+
+    case '3':
+        switch (mode[0]){
+        case 'l':
+            // hier3_lru(num_pages, page_size, file);
+            break;
+        case 'f':   
+            hier3_fifo(num_pages, page_size, file);
+            break;
+        case 'r':
+            // hier3_random(num_pages, page_size, file);
+            break;
+        case '2':
+            // hier3_2a(num_pages, page_size, file);
             break;
         }
         break;
