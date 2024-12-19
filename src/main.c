@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "include/mem_address.h"
-#include "include/inverted.h"
-#include "include/dense.h"
-#include "include/hier2.h"
-#include "include/hier3.h"
+#include "../include/mem_address.h"
+#include "../include/inverted.h"
+#include "../include/dense.h"
+#include "../include/hier2.h"
+#include "../include/hier3.h"
 
 
 FILE *file;

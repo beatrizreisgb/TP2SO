@@ -1,15 +1,18 @@
+#ifndef MEM_ADDRESS_H
+#define MEM_ADDRESS_H
+
 #include <stdio.h>
 #include <stdlib.h>
 
-int fifo_first;
-int hit;
-int miss;
-int global_time;
-int written;
-int second_chance_idx;
-int pages_count;
-unsigned addr;
-char rw;
+extern int fifo_first;
+extern int hit;
+extern int miss;
+extern int global_time;
+extern int written;
+extern int second_chance_idx;
+extern int pages_count;
+extern unsigned int addr;
+extern char rw;
 
 struct mem_address{
     unsigned addr;
@@ -17,6 +20,7 @@ struct mem_address{
     unsigned second;
     unsigned third;
     unsigned time;
+    unsigned dirty;
     char rw;
 };
 
@@ -37,3 +41,5 @@ void print_result();
 unsigned find_row(unsigned num, int shift);
 
 unsigned find_column(unsigned num, int shift);
+
+#endif // MEM_ADDRESS_H

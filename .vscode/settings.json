@@ -2,6 +2,7 @@
     "files.associations": {
         "*.embeddedhtml": "html",
         "stdlib.h": "c",
-        "mem_address.h": "c"
+        "mem_address.h": "c",
+        "hier2.h": "c"
     }
 }

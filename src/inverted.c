@@ -1,5 +1,5 @@
-#include "include/inverted.h"
-#include "include/mem_address.h"
+#include "../include/inverted.h"
+#include "../include/mem_address.h"
 
 void inverted_fifo(int num_pages, int page_size, FILE* file){
     struct mem_address* table;
@@ -8,20 +8,25 @@ void inverted_fifo(int num_pages, int page_size, FILE* file){
         struct mem_address pg;
         int s = find_s(page_size);
         pg.addr = addr >> s;
-        pg.rw = rw;
+        pg.dirty = 0;
         int page = pg.addr;
-        char rw = pg.rw;
         int found = 0;
 
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
                 found = 1;
                 hit++;
+                if (rw == 'W'){
+                    table[i].dirty = 1;
+                }
+                
                 break;
             }
             if(table[i].addr == -1){
                 table[i].addr = page;
-                table[i].rw = rw;
+                if (rw == 'W'){
+                    table[i].dirty = 1;
+                }
                 found = 1;
                 miss++;
                 break;
@@ -30,13 +35,18 @@ void inverted_fifo(int num_pages, int page_size, FILE* file){
         if (found) continue;
         miss++;
 
-        if (table[fifo_first].rw == 'W'){
+        table[fifo_first].addr = page;
+
+        if (rw == 'W'){
+            table[fifo_first].dirty = 1;
+        }
+
+        if (table[fifo_first].dirty == 1){
             written++;
         }
 
-        table[fifo_first].addr = page;
-        table[fifo_first].rw = rw;
         fifo_first = (fifo_first + 1) % num_pages;
+    
         continue;
     }
     print_result();

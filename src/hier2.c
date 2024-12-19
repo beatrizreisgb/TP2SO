@@ -1,5 +1,5 @@
-#include "include/hier2.h"
-#include "include/mem_address.h"
+#include "../include/hier2.h"
+#include "../include/mem_address.h"
 
 #define INF 1000000000
 

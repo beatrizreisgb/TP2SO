@@ -1,5 +1,5 @@
-#include "include/dense.h"
-#include "include/mem_address.h"
+#include "../include/dense.h"
+#include "../include/mem_address.h"
 
 #define INF 1000000000
 
