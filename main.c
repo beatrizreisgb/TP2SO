@@ -87,16 +87,16 @@ int main (int argc, char* argv[]){
     case '3':
         switch (mode[0]){
         case 'l':
-            // hier3_lru(num_pages, page_size, file);
+            hier3_lru(num_pages, page_size, file);
             break;
         case 'f':   
             hier3_fifo(num_pages, page_size, file);
             break;
         case 'r':
-            // hier3_random(num_pages, page_size, file);
+            hier3_random(num_pages, page_size, file);
             break;
         case '2':
-            // hier3_2a(num_pages, page_size, file);
+            hier3_2a(num_pages, page_size, file);
             break;
         }
         break;
