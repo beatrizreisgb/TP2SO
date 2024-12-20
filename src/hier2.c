@@ -3,7 +3,7 @@
 
 #define INF 1000000000
 
-void hier2_fifo(int num_pages, int page_size, FILE* file){
+void hier2_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 8 - s;
 
@@ -16,6 +16,7 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift);
         pg.second = find_column(pg.addr, shift);
@@ -31,6 +32,7 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             if (rw == 'W'){
                 table[pg.first][pg.second].dirty = 1;
             }
@@ -38,6 +40,7 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
@@ -82,7 +85,7 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier2_lru(int num_pages, int page_size, FILE* file){
+void hier2_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 8 - s;
 
@@ -95,6 +98,7 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift);
         pg.second = find_column(pg.addr, shift);
@@ -110,6 +114,7 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second){
                     time_table[i].time = global_time++;
@@ -125,6 +130,7 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
        
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
@@ -169,7 +175,7 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier2_random(int num_pages, int page_size, FILE* file){
+void hier2_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 8 - s;
 
@@ -182,6 +188,7 @@ void hier2_random(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift);
         pg.second = find_column(pg.addr, shift);
@@ -195,6 +202,7 @@ void hier2_random(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second){
                     time_table[i].time = global_time++;
@@ -208,6 +216,7 @@ void hier2_random(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
@@ -248,7 +257,7 @@ void hier2_random(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier2_2a(int num_pages, int page_size, FILE* file){
+void hier2_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 8 - s;
 
@@ -261,6 +270,7 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift);
         pg.second = find_column(pg.addr, shift);
@@ -276,6 +286,7 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second){
                     time_table[i].time = 1;
@@ -289,6 +300,7 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;

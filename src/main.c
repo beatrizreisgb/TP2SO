@@ -39,20 +39,25 @@ int main (int argc, char* argv[]){
     printf("Tamanho das páginas: %d KB\n", page_size/1024);
     printf("Técnica de reposição: %s\n", mode);
 
+    FILE *outfile;
+    if (debug_flag[0] == 'd'){
+        outfile = fopen("debugging_mode.txt", "w");
+    }
+
     switch (table_type[0]){
     case 'i':
         switch (mode[0]){
         case 'l':
-            inverted_lru(num_pages, page_size, file);
+            inverted_lru(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'f':
-            inverted_fifo(num_pages, page_size, file);
+            inverted_fifo(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'r':
-            inverted_random(num_pages, page_size, file);
+            inverted_random(num_pages, page_size, file, debug_flag, outfile);
             break;
         case '2':
-            inverted_2a(num_pages, page_size, file);
+            inverted_2a(num_pages, page_size, file, debug_flag, outfile);
             break;
         }
         break;
@@ -60,16 +65,16 @@ int main (int argc, char* argv[]){
     case 'd':
         switch (mode[0]){
         case 'l':
-            dense_lru(num_pages, page_size, file, dense_size);
+            dense_lru(num_pages, page_size, file, dense_size, debug_flag, outfile);
             break;
         case 'f':   
-            dense_fifo(num_pages, page_size, file, dense_size);
+            dense_fifo(num_pages, page_size, file, dense_size, debug_flag, outfile);
             break;
         case 'r':
-            dense_random(num_pages, page_size, file, dense_size);
+            dense_random(num_pages, page_size, file, dense_size, debug_flag, outfile);
             break;
         case '2':
-            dense_2a(num_pages, page_size, file, dense_size);
+            dense_2a(num_pages, page_size, file, dense_size, debug_flag, outfile);
             break;
         }
         break;
@@ -77,16 +82,16 @@ int main (int argc, char* argv[]){
     case '2':
         switch (mode[0]){
         case 'l':
-            hier2_lru(num_pages, page_size, file);
+            hier2_lru(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'f':   
-            hier2_fifo(num_pages, page_size, file);
+            hier2_fifo(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'r':
-            hier2_random(num_pages, page_size, file);
+            hier2_random(num_pages, page_size, file, debug_flag, outfile);
             break;
         case '2':
-            hier2_2a(num_pages, page_size, file);
+            hier2_2a(num_pages, page_size, file, debug_flag, outfile);
             break;
         }
         break;
@@ -94,22 +99,23 @@ int main (int argc, char* argv[]){
     case '3':
         switch (mode[0]){
         case 'l':
-            hier3_lru(num_pages, page_size, file);
+            hier3_lru(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'f':   
-            hier3_fifo(num_pages, page_size, file);
+            hier3_fifo(num_pages, page_size, file, debug_flag, outfile);
             break;
         case 'r':
-            hier3_random(num_pages, page_size, file);
+            hier3_random(num_pages, page_size, file, debug_flag, outfile);
             break;
         case '2':
-            hier3_2a(num_pages, page_size, file);
+            hier3_2a(num_pages, page_size, file, debug_flag, outfile);
             break;
         }
         break;
     } 
 
     fclose(file);
+    fclose(outfile);
 
     return (0);
 }

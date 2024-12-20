@@ -3,7 +3,7 @@
 
 #define INF 1000000000
 
-void hier3_fifo(int num_pages, int page_size, FILE* file){
+void hier3_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 10 - s;
 
@@ -33,6 +33,7 @@ void hier3_fifo(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift + 6);
         int temp = find_row(pg.addr, shift);
@@ -52,6 +53,7 @@ void hier3_fifo(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second][pg.third].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             if (rw == 'W'){
                 table[pg.first][pg.second][pg.third].dirty = 1;
             }
@@ -59,6 +61,7 @@ void hier3_fifo(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second][pg.third].addr = 1;
@@ -107,7 +110,7 @@ void hier3_fifo(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier3_lru(int num_pages, int page_size, FILE* file){
+void hier3_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 10 - s;
 
@@ -137,6 +140,7 @@ void hier3_lru(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift + 6);
         int temp = find_row(pg.addr, shift);
@@ -156,6 +160,7 @@ void hier3_lru(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second][pg.third].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second && time_table[i].third == pg.third){
                     time_table[i].time = global_time++;
@@ -170,6 +175,7 @@ void hier3_lru(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second][pg.third].addr = 1;
@@ -219,7 +225,7 @@ void hier3_lru(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier3_random(int num_pages, int page_size, FILE* file){
+void hier3_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 10 - s;
 
@@ -249,6 +255,7 @@ void hier3_random(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift + 6);
         int temp = find_row(pg.addr, shift);
@@ -268,6 +275,7 @@ void hier3_random(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second][pg.third].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second && time_table[i].third == pg.third){
                     time_table[i].time = global_time++;
@@ -281,6 +289,7 @@ void hier3_random(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second][pg.third].addr = 1;
@@ -324,7 +333,7 @@ void hier3_random(int num_pages, int page_size, FILE* file){
     print_result();
 }
 
-void hier3_2a(int num_pages, int page_size, FILE* file){
+void hier3_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     int s = find_s(page_size);
     int shift = 32 - 10 - s;
 
@@ -354,6 +363,7 @@ void hier3_2a(int num_pages, int page_size, FILE* file){
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
         pg.addr = addr >> s;
         pg.first = find_row(pg.addr, shift + 6);
         int temp = find_row(pg.addr, shift);
@@ -373,6 +383,7 @@ void hier3_2a(int num_pages, int page_size, FILE* file){
 
         if (table[pg.first][pg.second][pg.third].addr == 1) {
             hit++;
+            if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
             for (int i = 0; i < num_pages; i++) {
                 if (time_table[i].first == pg.first && time_table[i].second == pg.second && time_table[i].third == pg.third){
                     time_table[i].time = 1;
@@ -386,6 +397,7 @@ void hier3_2a(int num_pages, int page_size, FILE* file){
         }
 
         miss++;
+        if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
         if (pages_count < num_pages){
             table[pg.first][pg.second][pg.third].addr = 1;
