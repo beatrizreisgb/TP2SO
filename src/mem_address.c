@@ -61,9 +61,8 @@ unsigned find_s(int page_size){
 }
 
 void print_result(){
-    printf("Hits: %d\n", hit);
-    printf("Misses/Page faults: %d\n", miss);
-    printf("Writes: %d\n", written);
+    printf("Páginas lidas: %d\n", miss);
+    printf("Páginas escritas: %d\n", written);
 }
 
 unsigned find_row(unsigned page, int shift){

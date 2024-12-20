@@ -8,10 +8,10 @@ OBJS = $(OBJ)/main.o $(OBJ)/dense.o $(OBJ)/inverted.o $(OBJ)/mem_address.o $(OBJ
 HDRS =  $(INC)/dense.h $(INC)/inverted.h $(INC)/mem_address.h $(INC)/hier2.h $(INC)/hier3.h
 CFLAGS = -Wall -c -I$(INC)
 
-EXE = $(BIN)/main
+EXE = $(BIN)/tp2virtual
 
-$(BIN)/main: $(OBJS)
-	$(CC) -w -o $(BIN)/main $(OBJS) $(LIBS)
+$(EXE): $(OBJS)
+	$(CC) -w -o $(EXE) $(OBJS) $(LIBS)
 
 $(OBJ)/main.o: $(HDRS) $(SRC)/main.c
 	$(CC) $(CFLAGS) -w -o $(OBJ)/main.o $(SRC)/main.c 

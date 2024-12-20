@@ -32,6 +32,13 @@ int main (int argc, char* argv[]){
         return 1;
     }
 
+    printf("prompt> tp2virtual %s %s %d %d\n", mode, file_name, page_size/1024, mem_size/1024);
+    printf("Executando o simulador...\n");
+    printf("Arquivo de entrada: %s\n", file_name);
+    printf("Tamanho da memória: %d KB\n", mem_size/1024);
+    printf("Tamanho das páginas: %d KB\n", page_size/1024);
+    printf("Técnica de reposição: %s\n", mode);
+
     switch (table_type[0]){
     case 'i':
         switch (mode[0]){
