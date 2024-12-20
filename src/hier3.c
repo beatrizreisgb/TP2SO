@@ -28,8 +28,7 @@ void hier3_fifo(int num_pages, int page_size, FILE* file){
         }
     }
 
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -126,8 +125,7 @@ void hier3_lru(int num_pages, int page_size, FILE* file){
         }
     }
 
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -229,8 +227,7 @@ void hier3_random(int num_pages, int page_size, FILE* file){
         }
     }
 
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -328,8 +325,7 @@ void hier3_2a(int num_pages, int page_size, FILE* file){
         }
     }
 
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;

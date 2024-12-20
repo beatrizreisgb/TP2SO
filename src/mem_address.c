@@ -10,6 +10,36 @@ int pages_count = 0;
 unsigned addr;
 char rw;
 
+struct mem_address* create_table(int size){    
+    struct mem_address* table;
+    table = (struct mem_address*) malloc(size * sizeof(struct mem_address));
+
+    return table;
+}
+
+struct page_time* create_time_table(int size){
+    struct page_time* time_table;
+    time_table = (struct page_time*) malloc(size * sizeof(struct page_time));
+
+    return time_table;
+}
+
+struct mem_address** create_2aTable(int rows, int columns){
+    struct mem_address** table = (struct mem_address**)malloc(rows * sizeof(struct mem_address*));
+
+    for (int i = 0; i < rows; i++) {
+       table[i] = (struct mem_address*)malloc(columns * sizeof(struct mem_address));
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            table[i][j].addr = -1;
+        }
+    }
+
+    return table;
+}
+
 int power(int base, int exp) {
     int resultado = 1;
     for (int i = 0; i < exp; i++) {

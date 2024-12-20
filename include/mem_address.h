@@ -32,6 +32,12 @@ struct page_time{
     unsigned time;
 };
 
+struct mem_address* create_table(int size);
+
+struct page_time* create_time_table(int size);
+
+struct mem_address** create_2aTable(int rows, int columns);
+
 int power(int base, int exp);
 
 unsigned find_s(int page_size);

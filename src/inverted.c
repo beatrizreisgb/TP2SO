@@ -1,9 +1,10 @@
 #include "../include/inverted.h"
 #include "../include/mem_address.h"
 
+//algoritmo do fifo para a tabela invertida
 void inverted_fifo(int num_pages, int page_size, FILE* file){
-    struct mem_address* table;
-    table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
+    struct mem_address* table = create_table(num_pages);
+    int choice = 0;
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -14,47 +15,42 @@ void inverted_fifo(int num_pages, int page_size, FILE* file){
 
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
-                found = 1;
+                found++;
                 hit++;
                 if (rw == 'W'){
                     table[i].dirty = 1;
                 }
-                
                 break;
             }
             if(table[i].addr == -1){
                 table[i].addr = page;
-                if (rw == 'W'){
-                    table[i].dirty = 1;
-                }
-                found = 1;
+                table[i].dirty = (rw == 'W') ? 1 : 0;
+                found++;
                 miss++;
                 break;
             }
         }
+        
         if (found) continue;
         miss++;
 
-        table[fifo_first].addr = page;
-
-        if (rw == 'W'){
-            table[fifo_first].dirty = 1;
-        }
-
-        if (table[fifo_first].dirty == 1){
+        if (table[choice].dirty == 1){
             written++;
         }
 
-        fifo_first = (fifo_first + 1) % num_pages;
-    
+        table[choice].addr = page;
+        table[choice].dirty = (rw == 'W') ? 1 : 0;
+
+        choice = (choice + 1) % num_pages;
+
         continue;
     }
     print_result();
 }
 
+//algoritmo do lru para a tabela invertida
 void inverted_lru(int num_pages, int page_size, FILE* file){
-    struct mem_address* table;
-    table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
+    struct mem_address* table = create_table(num_pages);
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -66,39 +62,45 @@ void inverted_lru(int num_pages, int page_size, FILE* file){
 
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
+                found++;
                 hit++;
+                if (rw == 'W'){
+                    table[i].dirty = 1;
+                }
                 table[i].time = global_time;
                 global_time++;
-                found++;
                 break;
             }
             if(table[i].addr == -1){
                 table[i].addr = page;
                 table[i].time = global_time;
                 table[i].rw = rw;
-                miss++;
+                table[i].dirty = (rw == 'W') ? 1 : 0;
                 global_time++;
                 found++;
+                miss++;
                 break;
             }
         }
         if (found) continue;
         miss++;
-        int lru = 0; // least recently used position
 
+        int choice = 0; // least recently used position
+        
         for (int i = 0; i < num_pages; i++) {
-            if (table[i].time < table[lru].time) {
-                lru = i;
+            if (table[i].time < table[choice].time) {
+                choice = i;
             }
         }
         
-        if (table[lru].rw == 'W'){
+        if (table[choice].dirty == 1){
             written++;
         }
 
-        table[lru].addr = page;
-        table[lru].rw = rw;
-        table[lru].time = global_time;
+        table[choice].addr = page;
+        table[choice].rw = rw;
+        table[choice].time = global_time;
+        table[choice].dirty = (rw == 'W') ? 1 : 0;
 
         global_time++;
 
@@ -108,8 +110,7 @@ void inverted_lru(int num_pages, int page_size, FILE* file){
 }
 
 void inverted_random(int num_pages, int page_size, FILE* file){
-    struct mem_address* table;
-    table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
+    struct mem_address* table = create_table(num_pages);
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         int s = find_s(page_size);
@@ -123,32 +124,40 @@ void inverted_random(int num_pages, int page_size, FILE* file){
             if (table[i].addr == page) {
                 hit++;
                 found++;
+                if (rw == 'W'){
+                    table[i].dirty = 1;
+                }
                 break;
             }
             if(table[i].addr == -1){
                 table[i].addr = page;
                 table[i].rw = rw;
-                miss++;
+                table[i].dirty = (rw == 'W') ? 1 : 0;
                 found++;
+                miss++;
                 break;
             }
         }
         if (found) continue;
         miss++;
-        int rand_idx = rand() % num_pages;
-        if (table[rand_idx].rw == 'W'){
+
+        int choice = rand() % num_pages;
+
+        if (table[choice].dirty == 1){
             written++;
         }
-        table[rand_idx].addr = page;
-        table[rand_idx].rw = rw;
+
+        table[choice].addr = page;
+        table[choice].rw = rw;
+        table[choice].dirty = (rw == 'W') ? 1 : 0;
+
         continue;
     }
     print_result();
 }
 
 void inverted_2a(int num_pages, int page_size, FILE* file){
-    struct mem_address* table;
-    table = (struct mem_address*) malloc(num_pages * sizeof(struct mem_address));
+    struct mem_address* table = create_table(num_pages);
     int* second_chance;
     second_chance = (int*) malloc(num_pages * sizeof(int));
     for (int i = 0; i < num_pages; i++){
@@ -166,14 +175,18 @@ void inverted_2a(int num_pages, int page_size, FILE* file){
 
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
+                found++;
                 hit++;
                 second_chance[i] = 1;
-                found++;
+                if (rw == 'W'){
+                    table[i].dirty = 1;
+                }
                 break;
             }
             if(table[i].addr == -1){
                 table[i].addr = page;
                 table[i].rw = rw;
+                table[i].dirty = (rw == 'W') ? 1 : 0;
                 miss++;
                 found++;
                 break;
@@ -198,13 +211,14 @@ void inverted_2a(int num_pages, int page_size, FILE* file){
         if (choice == -1) choice = second_chance_idx;
         second_chance_idx = (choice + 1) % num_pages;
 
-        if (table[choice].rw == 'W'){
+        if (table[choice].dirty == 1){
             written++;
         }
 
         table[choice].addr = page;
         table[choice].rw = rw;
         second_chance[choice] = 0;
+        table[choice].dirty = (rw == 'W') ? 1 : 0;
         continue;
     }
     print_result();

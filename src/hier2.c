@@ -10,20 +10,9 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
     int rows = power(2, 8);
     int columns = power(2, shift);
 
-    struct mem_address** table = (struct mem_address**)malloc(rows * sizeof(struct mem_address*));
+    struct mem_address** table = create_2aTable(rows, columns);
 
-    for (int i = 0; i < rows; i++) {
-       table[i] = (struct mem_address*)malloc(columns * sizeof(struct mem_address));
-    }
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < columns; j++) {
-            table[i][j].addr = -1;
-        }
-    }
-
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -35,24 +24,25 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
         int page = pg.addr;
         char rw = pg.rw;
 
-        int found = 0;
         int min_time = INF;
-        int fifo_first = 0;
-        int fifo_second = 0;
+        int choice_first = 0;
+        int choice_second = 0;
         int time_idx = 0;
 
         if (table[pg.first][pg.second].addr == 1) {
             hit++;
-            found++;
+            if (rw == 'W'){
+                table[pg.first][pg.second].dirty = 1;
+            }
+            continue;
         }
-
-        if (found) continue;
 
         miss++;
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
             table[pg.first][pg.second].rw = rw;
+            table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
             table[pg.first][pg.second].time = global_time++;
 
             time_table[pages_count].time = global_time++;
@@ -60,25 +50,28 @@ void hier2_fifo(int num_pages, int page_size, FILE* file){
             time_table[pages_count].second = pg.second;
 
             pages_count++;
-            found++;
+            continue;
         }
-
-        if (found) continue;
 
         for (int i = 0; i < num_pages; i++) {
             if (time_table[i].time < min_time) {
                 min_time = time_table[i].time;
-                fifo_first = time_table[i].first;
-                fifo_second = time_table[i].second;
+                choice_first = time_table[i].first;
+                choice_second = time_table[i].second;
                 time_idx = i;
             }
         }
 
-        table[fifo_first][fifo_second].addr = -1;
-        table[fifo_first][fifo_second].rw = ' ';
+        table[choice_first][choice_second].addr = -1;
+        table[choice_first][choice_second].rw = ' ';
+
+        if (table[choice_first][choice_second].dirty == 1){
+            written++;
+        }
 
         table[pg.first][pg.second].addr = 1;
         table[pg.first][pg.second].rw = rw;
+        table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
 
         time_table[time_idx].time = global_time++;
         time_table[time_idx].first = pg.first;
@@ -96,20 +89,9 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
     int rows = power(2, 8);
     int columns = power(2, shift);
 
-    struct mem_address** table = (struct mem_address**)malloc(rows * sizeof(struct mem_address*));
+    struct mem_address** table = create_2aTable(rows, columns);
 
-    for (int i = 0; i < rows; i++) {
-       table[i] = (struct mem_address*)malloc(columns * sizeof(struct mem_address));
-    }
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < columns; j++) {
-            table[i][j].addr = -1;
-        }
-    }
-
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -121,10 +103,9 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
         int page = pg.addr;
         char rw = pg.rw;
 
-        int found = 0;
         int min_time = INF;
-        int fifo_first = 0;
-        int fifo_second = 0;
+        int choice_first = 0;
+        int choice_second = 0;
         int time_idx = 0;
 
         if (table[pg.first][pg.second].addr == 1) {
@@ -135,16 +116,20 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
                     break;
                 }
             }
-            found++;
+            if (rw == 'W'){
+                table[pg.first][pg.second].dirty = 1;
+            }
+            continue;
         }
 
-        if (found) continue;
+       
 
         miss++;
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
             table[pg.first][pg.second].rw = rw;
+            table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
             table[pg.first][pg.second].time = global_time++;
 
             time_table[pages_count].time = global_time++;
@@ -152,25 +137,28 @@ void hier2_lru(int num_pages, int page_size, FILE* file){
             time_table[pages_count].second = pg.second;
 
             pages_count++;
-            found++;
+            continue;
         }
-
-        if (found) continue;
 
         for (int i = 0; i < num_pages; i++) {
             if (time_table[i].time < min_time) {
                 min_time = time_table[i].time;
-                fifo_first = time_table[i].first;
-                fifo_second = time_table[i].second;
+                choice_first = time_table[i].first;
+                choice_second = time_table[i].second;
                 time_idx = i;
             }
         }
 
-        table[fifo_first][fifo_second].addr = -1;
-        table[fifo_first][fifo_second].rw = ' ';
+        table[choice_first][choice_second].addr = -1;
+        table[choice_first][choice_second].rw = ' ';
+
+        if (table[choice_first][choice_second].dirty == 1){
+            written++;
+        }
 
         table[pg.first][pg.second].addr = 1;
         table[pg.first][pg.second].rw = rw;
+        table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
 
         time_table[time_idx].time = global_time++;
         time_table[time_idx].first = pg.first;
@@ -188,20 +176,9 @@ void hier2_random(int num_pages, int page_size, FILE* file){
     int rows = power(2, 8);
     int columns = power(2, shift);
 
-    struct mem_address** table = (struct mem_address**)malloc(rows * sizeof(struct mem_address*));
+    struct mem_address** table = create_2aTable(rows, columns);
 
-    for (int i = 0; i < rows; i++) {
-       table[i] = (struct mem_address*)malloc(columns * sizeof(struct mem_address));
-    }
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < columns; j++) {
-            table[i][j].addr = -1;
-        }
-    }
-
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -213,10 +190,7 @@ void hier2_random(int num_pages, int page_size, FILE* file){
         int page = pg.addr;
         char rw = pg.rw;
 
-        int found = 0;
         int min_time = INF;
-        int fifo_first = 0;
-        int fifo_second = 0;
         int time_idx = 0;
 
         if (table[pg.first][pg.second].addr == 1) {
@@ -227,16 +201,18 @@ void hier2_random(int num_pages, int page_size, FILE* file){
                     break;
                 }
             }
-            found++;
+            if (rw == 'W'){
+                table[pg.first][pg.second].dirty = 1;
+            }
+            continue;
         }
-
-        if (found) continue;
 
         miss++;
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
             table[pg.first][pg.second].rw = rw;
+            table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
             table[pg.first][pg.second].time = global_time++;
 
             time_table[pages_count].time = global_time++;
@@ -244,21 +220,24 @@ void hier2_random(int num_pages, int page_size, FILE* file){
             time_table[pages_count].second = pg.second;
 
             pages_count++;
-            found++;
+            continue;
         }
-
-        if (found) continue;
 
         time_idx = rand() % num_pages;
 
         int choice_first = time_table[time_idx].first;
         int choice_second = time_table[time_idx].second;
 
+        if (table[choice_first][choice_second].dirty == 1){
+            written++;
+        }
+
         table[choice_first][choice_second].addr = -1;
         table[choice_first][choice_second].rw = ' ';
 
         table[pg.first][pg.second].addr = 1;
         table[pg.first][pg.second].rw = rw;
+        table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
 
         time_table[time_idx].time = global_time++;
         time_table[time_idx].first = pg.first;
@@ -276,20 +255,9 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
     int rows = power(2, 8);
     int columns = power(2, shift);
 
-    struct mem_address** table = (struct mem_address**)malloc(rows * sizeof(struct mem_address*));
+    struct mem_address** table = create_2aTable(rows, columns);
 
-    for (int i = 0; i < rows; i++) {
-       table[i] = (struct mem_address*)malloc(columns * sizeof(struct mem_address));
-    }
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < columns; j++) {
-            table[i][j].addr = -1;
-        }
-    }
-
-    struct page_time* time_table;
-    time_table = (struct page_time*) malloc(num_pages * sizeof(struct page_time));
+    struct page_time* time_table = create_time_table(num_pages);
     
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
@@ -301,7 +269,6 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
         int page = pg.addr;
         char rw = pg.rw;
 
-        int found = 0;
         int min_time = INF;
         int fifo_first = 0;
         int fifo_second = 0;
@@ -315,16 +282,18 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
                     break;
                 }
             }
-            found++;
+            if (rw == 'W'){
+                table[pg.first][pg.second].dirty = 1;
+            }
+            continue;
         }
-
-        if (found) continue;
 
         miss++;
 
         if (pages_count < num_pages){
             table[pg.first][pg.second].addr = 1;
             table[pg.first][pg.second].rw = rw;
+            table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
             table[pg.first][pg.second].time =0;
 
             time_table[pages_count].time = 0;
@@ -332,10 +301,8 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
             time_table[pages_count].second = pg.second;
 
             pages_count++;
-            found++;
+            continue;
         }
-
-        if (found) continue;
 
         int choice = -1;
 
@@ -360,8 +327,13 @@ void hier2_2a(int num_pages, int page_size, FILE* file){
         table[first_idx][second_idx].addr = -1;
         table[first_idx][second_idx].rw = ' ';
 
+        if (table[first_idx][second_idx].dirty == 1){
+            written++;
+        }
+
         table[pg.first][pg.second].addr = 1;
         table[pg.first][pg.second].rw = rw;
+        table[pg.first][pg.second].dirty = (rw == 'W') ? 1 : 0;
 
         time_table[choice].time = 0;
         time_table[choice].first = pg.first;
