@@ -50,6 +50,7 @@ void inverted_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, F
         continue;
     }
     print_result();
+    free_table(table);
 }
 
 //algoritmo do lru para a tabela invertida
@@ -115,6 +116,7 @@ void inverted_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FI
         continue;
     }
     print_result();
+    free_table(table);
 }
 
 void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -166,6 +168,7 @@ void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag,
         continue;
     }
     print_result();
+    free_table(table);
 }
 
 void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -238,4 +241,5 @@ void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FIL
         continue;
     }
     print_result();
+    free_table(table);
 }

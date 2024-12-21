@@ -77,8 +77,9 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* 
 
         continue;
     }
-    
     print_result();
+    free_table(table);
+    free_time_table(time_table);
 }
 
 void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
@@ -158,8 +159,9 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* d
 
         continue;
     }
-    
     print_result();
+    free_table(table);
+    free_time_table(time_table);
 }
 
 void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
@@ -227,6 +229,8 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char
         continue;
     }
     print_result();
+    free_table(table);
+    free_time_table(time_table);
 }
 
 
@@ -321,4 +325,6 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
     }
     
     print_result();
+    free_table(table);
+    free_time_table(time_table);
 }

@@ -40,6 +40,46 @@ struct mem_address** create_2aTable(int rows, int columns){
     return table;
 }
 
+void free_table(struct mem_address* table){
+    if (table != NULL) {
+        free(table);
+    }
+}
+
+void free_time_table(struct page_time* time_table){
+    if (time_table != NULL) {
+        free(time_table);
+    }
+}
+
+void free_2aTable(struct mem_address** table, int rows){
+    if (table != NULL) {
+        for (int i = 0; i < rows; i++) {
+            if (table[i] != NULL) {
+                free(table[i]);
+            }
+        }
+        free(table);
+    }
+}
+
+void free_3aTable(struct mem_address*** table, int rows, int columns){
+    if (table != NULL) {
+        for (int i = 0; i < rows; i++) {
+            if (table[i] != NULL) {
+                for (int j = 0; j < columns; j++) {
+                    if (table[i][j] != NULL) {
+                        free(table[i][j]);
+                    }
+                }
+                free(table[i]);
+            }
+        }
+        free(table); 
+    }
+}
+
+
 int power(int base, int exp) {
     int resultado = 1;
     for (int i = 0; i < exp; i++) {

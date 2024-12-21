@@ -38,6 +38,14 @@ struct page_time* create_time_table(int size);
 
 struct mem_address** create_2aTable(int rows, int columns);
 
+void free_table(struct mem_address* table);
+
+void free_time_table(struct page_time* time_table);
+
+void free_2aTable(struct mem_address** table, int rows);
+
+void free_3aTable(struct mem_address*** table, int rows, int columns);
+
 int power(int base, int exp);
 
 unsigned find_s(int page_size);

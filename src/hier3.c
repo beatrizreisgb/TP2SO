@@ -108,6 +108,8 @@ void hier3_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, FILE
         continue;
     }
     print_result();
+    free_3aTable(table, rows, columns);
+    free_time_table(time_table);
 }
 
 void hier3_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -223,6 +225,8 @@ void hier3_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE*
         continue;
     }
     print_result();
+    free_3aTable(table, rows, columns);
+    free_time_table(time_table);
 }
 
 void hier3_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -331,6 +335,8 @@ void hier3_random(int num_pages, int page_size, FILE* file, char* debug_flag, FI
         continue;
     }
     print_result();
+    free_3aTable(table, rows, columns);
+    free_time_table(time_table);
 }
 
 void hier3_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -455,4 +461,6 @@ void hier3_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* 
         continue;
     }
     print_result();
+    free_3aTable(table, rows, columns);
+    free_time_table(time_table);
 }

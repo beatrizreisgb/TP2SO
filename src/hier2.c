@@ -83,6 +83,8 @@ void hier2_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, FILE
         continue;
     }
     print_result();
+    free_2aTable(table, rows);
+    free_time_table(time_table);
 }
 
 void hier2_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -173,6 +175,8 @@ void hier2_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE*
         continue;
     }
     print_result();
+    free_2aTable(table, rows);
+    free_time_table(time_table);
 }
 
 void hier2_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -255,6 +259,8 @@ void hier2_random(int num_pages, int page_size, FILE* file, char* debug_flag, FI
         continue;
     }
     print_result();
+    free_2aTable(table, rows);
+    free_time_table(time_table);
 }
 
 void hier2_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
@@ -354,4 +360,6 @@ void hier2_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* 
         continue;
     }
     print_result();
+    free_2aTable(table, rows);
+    free_time_table(time_table);
 }
