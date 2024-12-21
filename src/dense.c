@@ -4,18 +4,21 @@
 #define INF 1000000000
 
 void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
-
-   struct mem_address* table = create_table(dense_size);
+    // Cria a tabela de endereços de memória
+    struct mem_address* table = create_table(dense_size);
        
+    // Inicializa a tabela com -1
     for (int i = 0; i < dense_size; i++){
         table[i].addr = -1;
         table[i].time = INF;
     }
 
+    // Cria a tabela de tempos
     struct page_time* time_table = create_time_table(num_pages);
 
     int choice = 0;
 
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -28,7 +31,7 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* 
         int fifo_first = 0;
         int time_idx = 0;
 
-
+        // Se a página já está na tabela, atualiza o número de hits e "suja" a página se for escrita, para evidenciar que foi alterada
         if (table[page].addr == 1) {
             hit++;
             if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
@@ -39,10 +42,11 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* 
             continue;
         }
 
-       
+        // Caso contrário, incrementa o número de misses
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Se ainda há espaço na tabela, adiciona a página - sem passar pela política de substituição
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
@@ -53,6 +57,8 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* 
             continue;
         }
 
+        // Se chegou até aqui, é porque a página não está na tabela e não há mais espaço.
+        // Portanto, é necessário escolher uma página para substituir.
         for (int i = 0; i < num_pages; i++) {
             if (time_table[i].time < min_time) {
                 min_time = time_table[i].time;
@@ -61,39 +67,49 @@ void dense_fifo(int num_pages, int page_size, FILE* file, int dense_size, char* 
             }
         }
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Tira a página escolhida da tabela
         table[choice].addr = -1;
         table[choice].rw = ' ';
 
+        // Coloca a nova página na tabela
         table[page].addr = 1;
         table[page].rw = rw;
         table[page].dirty = (rw == 'W') ? 1 : 0;
 
+        // Atualiza a tabela de tempo com dados da nova página
         time_table[time_idx].time = global_time++;
         time_table[time_idx].page = page;
 
         continue;
     }
+
+    // Por fim, imprime o resultado e libera a memória alocada
     print_result();
     free_table(table);
     free_time_table(time_table);
 }
 
 void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
-   struct mem_address* table = create_table(dense_size);
+    // Cria a tabela de endereços de memória
+    struct mem_address* table = create_table(dense_size);
        
+    // Inicializa a tabela com -1
     for (int i = 0; i < dense_size; i++){
         table[i].addr = -1;
         table[i].time = INF;
     }
 
+    // Cria a tabela de tempos
     struct page_time* time_table = create_time_table(num_pages);
 
     int choice = 0;
 
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -106,7 +122,7 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* d
         int fifo_first = 0;
         int time_idx = 0;
 
-
+        // Se a página já está na tabela, atualiza o número de hits e "suja" a página se for escrita, para evidenciar que foi alterada
         if (table[page].addr == 1) {
             hit++;
             if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
@@ -122,9 +138,11 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* d
             continue;
         }
         
+        // Caso contrário, incrementa o número de misses
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Se ainda há espaço na tabela, adiciona a página - sem passar pela política de substituição
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
@@ -135,6 +153,8 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* d
             continue;
         }
 
+        // Se chegou até aqui, é porque a página não está na tabela e não há mais espaço.
+        // Portanto, é necessário escolher uma página para substituir.
         for (int i = 0; i < num_pages; i++) {
             if (time_table[i].time < min_time) {
                 min_time = time_table[i].time;
@@ -143,39 +163,49 @@ void dense_lru(int num_pages, int page_size, FILE* file, int dense_size, char* d
             }
         }
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Tira a página escolhida da tabela
         table[choice].addr = -1;
         table[choice].rw = ' ';
 
+        // Coloca a nova página na tabela
         table[page].addr = 1;
         table[page].rw = rw;
         table[page].dirty = (rw == 'W') ? 1 : 0;
 
+        // Atualiza a tabela de tempo com dados da nova página
         time_table[time_idx].time = global_time++;
         time_table[time_idx].page = page;
 
         continue;
     }
+
+    // Por fim, imprime o resultado e libera a memória alocada
     print_result();
     free_table(table);
     free_time_table(time_table);
 }
 
 void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
-   struct mem_address* table = create_table(dense_size);
+    // Cria a tabela de endereços de memória
+    struct mem_address* table = create_table(dense_size);
        
+    // Inicializa a tabela com -1
     for (int i = 0; i < dense_size; i++){
         table[i].addr = -1;
         table[i].time = INF;
     }
     
+    // Cria a tabela de tempos
     struct page_time* time_table = create_time_table(num_pages);
 
     int s = find_s(page_size);
 
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -185,6 +215,7 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char
         char rw = pg.rw;
         int rand_idx;
 
+        // Se a página já está na tabela, atualiza o número de hits e "suja" a página se for escrita, para evidenciar que foi alterada
         if (table[page].addr == 1) {
             hit++;
             if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
@@ -194,9 +225,11 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char
             continue;
         }
         
+        // Caso contrário, incrementa o número de misses
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Se ainda há espaço na tabela, adiciona a página - sem passar pela política de substituição
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
@@ -207,27 +240,34 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char
             continue;
         }
 
-    
+        // Se chegou até aqui, é porque a página não está na tabela e não há mais espaço.
+        // Portanto, é necessário escolher uma página para substituir.
         rand_idx = rand() % num_pages;
 
         int choice = time_table[rand_idx].page;
         
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Tira a página escolhida da tabela
         table[choice].addr = -1;
         table[choice].rw = ' ';
 
+        // Coloca a nova página na tabela
         table[page].addr = 1;
         table[page].rw = rw;
         table[page].dirty = (rw == 'W') ? 1 : 0;
 
+        // Atualiza a tabela de tempo com dados da nova página
         time_table[rand_idx].time = global_time++;
         time_table[rand_idx].page = page;
 
         continue;
     }
+
+    // Por fim, imprime o resultado e libera a memória alocada
     print_result();
     free_table(table);
     free_time_table(time_table);
@@ -235,15 +275,19 @@ void dense_random(int num_pages, int page_size, FILE* file, int dense_size, char
 
 
 void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* debug_flag, FILE* outfile){
-   struct mem_address* table = create_table(dense_size);
+    // Cria a tabela de endereços de memória
+    struct mem_address* table = create_table(dense_size);
        
+    // Inicializa a tabela com -1
     for (int i = 0; i < dense_size; i++){
         table[i].addr = -1;
         table[i].time = INF;
     }
 
+    // Cria a tabela de tempos
     struct page_time* time_table = create_time_table(num_pages);
 
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -256,7 +300,7 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
         int fifo_first = 0;
         int time_idx = 0;
 
-
+        // Se a página já está na tabela, atualiza o número de hits e "suja" a página se for escrita, para evidenciar que foi alterada
         if (table[page].addr == 1) {
             hit++;
             if (debug_flag[0] == 'd') fprintf(outfile, "Hit\n");
@@ -273,9 +317,11 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
 
         }
         
+        // Caso contrário, incrementa o número de misses
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Se ainda há espaço na tabela, adiciona a página - sem passar pela política de substituição
         if (pages_count < num_pages){
             table[page].addr = 1;
             table[page].rw = rw;
@@ -286,6 +332,8 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
             continue;
         }
         
+        // Se chegou até aqui, é porque a página não está na tabela e não há mais espaço.
+        // Portanto, é necessário escolher uma página para substituir.
         int choice = -1;
 
         for (int i = 0; i < num_pages; i++) {
@@ -293,12 +341,10 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
             if (time_table[idx].time == 1) {
                 time_table[idx].time = 0;
                 continue;
-            }
-            else{
+            } else {
                 choice = idx;
                 break;
             }
-            continue;
         }
 
         if (choice == -1) choice = second_chance_idx;
@@ -306,24 +352,28 @@ void dense_2a(int num_pages, int page_size, FILE* file, int dense_size, char* de
 
         int table_idx = time_table[choice].page;
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[table_idx].dirty == 1){
             written++;
         }
 
+        // Tira a página escolhida da tabela
         table[table_idx].addr = -1;
         table[table_idx].rw = ' ';
 
+        // Coloca a nova página na tabela
         table[page].addr = 1;
         table[page].rw = rw;
         table[page].dirty = (rw == 'W') ? 1 : 0;
 
-
+        // Atualiza a tabela de tempo com dados da nova página
         time_table[choice].time = global_time++;
         time_table[choice].page = page;
 
         continue;
     }
     
+    // Por fim, imprime o resultado e libera a memória alocada
     print_result();
     free_table(table);
     free_time_table(time_table);

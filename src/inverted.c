@@ -1,10 +1,11 @@
 #include "../include/inverted.h"
 #include "../include/mem_address.h"
 
-//algoritmo do fifo para a tabela invertida
 void inverted_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     struct mem_address* table = create_table(num_pages);
     int choice = 0;
+
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -14,6 +15,7 @@ void inverted_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, F
         int page = pg.addr;
         int found = 0;
 
+        // Verifica se a página já está na tabela
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
                 found++;
@@ -38,13 +40,16 @@ void inverted_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, F
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Substitui a página na tabela
         table[choice].addr = page;
         table[choice].dirty = (rw == 'W') ? 1 : 0;
 
+        // Atualiza a posição de escolha para a próxima substituição
         choice = (choice + 1) % num_pages;
 
         continue;
@@ -53,9 +58,10 @@ void inverted_fifo(int num_pages, int page_size, FILE* file, char* debug_flag, F
     free_table(table);
 }
 
-//algoritmo do lru para a tabela invertida
 void inverted_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     struct mem_address* table = create_table(num_pages);
+
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -66,6 +72,7 @@ void inverted_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FI
         char rw = pg.rw;
         int found = 0;
 
+        // Verifica se a página já está na tabela
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
                 found++;
@@ -94,18 +101,20 @@ void inverted_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FI
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
-        int choice = 0; // least recently used position
-        
+        // Encontra a página menos recentemente usada
+        int choice = 0; // posição da página menos recentemente usada
         for (int i = 0; i < num_pages; i++) {
             if (table[i].time < table[choice].time) {
                 choice = i;
             }
         }
         
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Substitui a página na tabela
         table[choice].addr = page;
         table[choice].rw = rw;
         table[choice].time = global_time;
@@ -119,8 +128,11 @@ void inverted_lru(int num_pages, int page_size, FILE* file, char* debug_flag, FI
     free_table(table);
 }
 
+// Algoritmo RANDOM para a tabela invertida
 void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     struct mem_address* table = create_table(num_pages);
+
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -131,6 +143,7 @@ void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag,
         char rw = pg.rw;
         int found = 0;
 
+        // Verifica se a página já está na tabela
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
                 hit++;
@@ -155,12 +168,15 @@ void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag,
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
 
+        // Escolhe uma página aleatoriamente para substituir
         int choice = rand() % num_pages;
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Substitui a página na tabela
         table[choice].addr = page;
         table[choice].rw = rw;
         table[choice].dirty = (rw == 'W') ? 1 : 0;
@@ -171,6 +187,7 @@ void inverted_random(int num_pages, int page_size, FILE* file, char* debug_flag,
     free_table(table);
 }
 
+// Algoritmo Second-Chance para a tabela invertida
 void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FILE* outfile){
     struct mem_address* table = create_table(num_pages);
     int* second_chance;
@@ -179,6 +196,8 @@ void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FIL
         table[i].addr = -1;
         table[i].time = 0;
     }
+
+    // Lê o arquivo de entrada
     while(fscanf(file, "%x %c", &addr, &rw) == 2){
         struct mem_address pg;
         if (debug_flag[0] == 'd') fprintf(outfile, "Endereço: %x ", addr);
@@ -189,6 +208,7 @@ void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FIL
         char rw = pg.rw;
         int found = 0;
 
+        // Verifica se a página já está na tabela
         for (int i = 0; i < num_pages; i++) {
             if (table[i].addr == page) {
                 found++;
@@ -213,15 +233,15 @@ void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FIL
         if (found) continue;
         miss++;
         if (debug_flag[0] == 'd') fprintf(outfile, "Miss\n");
-        int choice = -1;
 
+        // Encontra uma página para substituir usando o algoritmo Second-Chance
+        int choice = -1;
         for (int i = 0; i < num_pages; i++) {
             int idx = (second_chance_idx + i) % num_pages;
             if (second_chance[idx] == 1) {
                 second_chance[idx] = 0;
                 continue;
-            }
-            else{
+            } else {
                 choice = idx;
                 break;
             }
@@ -230,14 +250,17 @@ void inverted_2a(int num_pages, int page_size, FILE* file, char* debug_flag, FIL
         if (choice == -1) choice = second_chance_idx;
         second_chance_idx = (choice + 1) % num_pages;
 
+        // Se a página substituída foi escrita, incrementa o número de escritas
         if (table[choice].dirty == 1){
             written++;
         }
 
+        // Substitui a página na tabela
         table[choice].addr = page;
         table[choice].rw = rw;
         second_chance[choice] = 0;
         table[choice].dirty = (rw == 'W') ? 1 : 0;
+
         continue;
     }
     print_result();
