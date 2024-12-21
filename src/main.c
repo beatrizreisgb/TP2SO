@@ -12,7 +12,13 @@ FILE *file;
 int page_size;
 
 int main (int argc, char* argv[]){
+
+    if (argc < 6) { 
+        printf("Insira os argumentos corretamente, conforme especificado.\n");
+        return 1;
+    }
     
+    char* debug_flag = "n";
     srand(time(NULL));
 
     char* mode = argv[1];
@@ -20,7 +26,7 @@ int main (int argc, char* argv[]){
     page_size = atoi(argv[3])*1024;
     int mem_size = atoi(argv[4])*1024;
     char* table_type = argv[5];
-    char* debug_flag = argv[6];
+    if (argc == 7) debug_flag = argv[6];
 
     int num_pages = mem_size / page_size;
     
@@ -115,7 +121,9 @@ int main (int argc, char* argv[]){
     } 
 
     fclose(file);
-    fclose(outfile);
+    if (debug_flag[0] == 'd'){
+        fclose(outfile);
+    }
 
     return (0);
 }
